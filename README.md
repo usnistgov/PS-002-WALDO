@@ -5,11 +5,7 @@
 * [Installation](#installation)
 * [Requirements](#requirements)
 * [Download Dataset](#download-dataset)
-* [How to Run](#how-to-run)
-* [Documentation](#documentation)
-* [Features](#features)
-* [Contributing](#contributing)
-* [Authors](#authors)
+* [How to generate dataset](#how-to-generate-dataset)
 * [License](#license)
 
 ## Installation
