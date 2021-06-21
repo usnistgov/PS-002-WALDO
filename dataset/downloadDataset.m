@@ -29,7 +29,7 @@
 ...% any situation where a failure could cause risk of injury or damage to
 ...% property. The software developed by NIST employees is not subject to
 ...% copyright protection within the United States.
-%% Title: A MATLAB Script to download all the files for "RF Dataset of Incumbent Radar Systems in the 3.5 GHz CBRS Band" 
+%% Title: A MATLAB Script to download all the files for "Dataset of channels and received IEEE 802.11ay signals for sensing applications in the 60GHz band" 
 %% Author: Raied Caromi
 %% Contact: raied.caromi@nist.gov
 %% set save directory name

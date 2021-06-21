@@ -29,7 +29,7 @@
 # any situation where a failure could cause risk of injury or damage to
 # property. The software developed by NIST employees is not subject to
 # copyright protection within the United States.
-# Title: A Python Script to download all the files for "RF Dataset of Incumbent Radar Systems in the 3.5 GHz CBRS Band" 
+# Title: A Python Script to download all the files for "Dataset of channels and received IEEE 802.11ay signals for sensing applications in the 60GHz band" 
 # Author: Raied Caromi
 # Contact: raied.caromi@nist.gov
 # Requires: Python3
@@ -96,7 +96,7 @@ if not(os.path.exists(saveDir)):
     os.mkdir(saveDir)
 #%% Get json record of the dataset
 baseUrl="https://data.nist.gov/rmm/records/"
-recordID="mds2-2116"
+recordID="mds2-2417"
 requestURL=baseUrl+recordID
 resp = requests.get(requestURL)
 if resp.status_code != 200:
