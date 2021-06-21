@@ -38,7 +38,7 @@
 %% Add paths
 matlabFolder = fileparts(which(mfilename));
 challengeFolder = fileparts(matlabFolder);
-outputFolder = fullfile(challengeFolder, 'mlOutput/');
+outputFolder = fullfile(challengeFolder, 'dataset/mlOutput/');
 addpath(genpath(challengeFolder));
 
 %% Params

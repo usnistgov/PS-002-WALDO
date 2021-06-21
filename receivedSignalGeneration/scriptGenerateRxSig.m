@@ -1,14 +1,17 @@
 %% Add paths
 matlabFolder = fileparts(which(mfilename));
 challengeFolder = fileparts(matlabFolder);
-inputFolder = fullfile(challengeFolder, 'dataset/');
+inputFolder = fullfile(challengeFolder, 'dataset/rxSignal');
 addpath(genpath(challengeFolder));
 
 %% Params
-Nsts = 4;
-Ntx  = 4;
 showPlot = 0;
 snr = [-18 0 18];
+chIdVec = 0:0;
+
+%% Constant
+Nsts = 4;
+Ntx  = 4;
 
 %% Dependent Params
 snrLen = size(snr,2);
@@ -23,7 +26,7 @@ tx = getEdmgCef(Nsts,Ntx);
 txLen = size(tx,1);
 
 %% Load channel
-for chId = 0:15577
+for chId = chIdVec
     H =  getChannel(chId);
     chLen = size(H,3);
     cpi = size(H,4);
