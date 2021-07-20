@@ -1,35 +1,35 @@
 ...%% Legal Disclaimer
-...% NIST-developed software is provided by NIST as a public service. 
-...% You may use, copy and distribute copies of the software in any medium,
-...% provided that you keep intact this entire notice. You may improve,
-...% modify and create derivative works of the software or any portion of
-...% the software, and you may copy and distribute such modifications or
-...% works. Modified works should carry a notice stating that you changed
-...% the software and should note the date and nature of any such change.
-...% Please explicitly acknowledge the National Institute of Standards and
-...% Technology as the source of the software.
-...% 
-...% NIST-developed software is expressly provided "AS IS." NIST MAKES NO
-...% WARRANTY OF ANY KIND, EXPRESS, IMPLIED, IN FACT OR ARISING BY
-...% OPERATION OF LAW, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTY
-...% OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT
-...% AND DATA ACCURACY. NIST NEITHER REPRESENTS NOR WARRANTS THAT THE
-...% OPERATION OF THE SOFTWARE WILL BE UNINTERRUPTED OR ERROR-FREE, OR
-...% THAT ANY DEFECTS WILL BE CORRECTED. NIST DOES NOT WARRANT OR MAKE ANY 
-...% REPRESENTATIONS REGARDING THE USE OF THE SOFTWARE OR THE RESULTS 
-...% THEREOF, INCLUDING BUT NOT LIMITED TO THE CORRECTNESS, ACCURACY,
-...% RELIABILITY, OR USEFULNESS OF THE SOFTWARE.
-...% 
-...% You are solely responsible for determining the appropriateness of
-...% using and distributing the software and you assume all risks
-...% associated with its use, including but not limited to the risks and
-...% costs of program errors, compliance with applicable laws, damage to 
-...% or loss of data, programs or equipment, and the unavailability or
-...% interruption of operation. This software is not intended to be used in
-...% any situation where a failure could cause risk of injury or damage to
-...% property. The software developed by NIST employees is not subject to
-...% copyright protection within the United States.
-%% Title: A MATLAB Script to download all the files for "Dataset of channels and received IEEE 802.11ay signals for sensing applications in the 60GHz band" 
+    ...% NIST-developed software is provided by NIST as a public service.
+    ...% You may use, copy and distribute copies of the software in any medium,
+    ...% provided that you keep intact this entire notice. You may improve,
+    ...% modify and create derivative works of the software or any portion of
+    ...% the software, and you may copy and distribute such modifications or
+    ...% works. Modified works should carry a notice stating that you changed
+    ...% the software and should note the date and nature of any such change.
+    ...% Please explicitly acknowledge the National Institute of Standards and
+    ...% Technology as the source of the software.
+    ...%
+    ...% NIST-developed software is expressly provided "AS IS." NIST MAKES NO
+    ...% WARRANTY OF ANY KIND, EXPRESS, IMPLIED, IN FACT OR ARISING BY
+    ...% OPERATION OF LAW, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTY
+    ...% OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT
+    ...% AND DATA ACCURACY. NIST NEITHER REPRESENTS NOR WARRANTS THAT THE
+    ...% OPERATION OF THE SOFTWARE WILL BE UNINTERRUPTED OR ERROR-FREE, OR
+    ...% THAT ANY DEFECTS WILL BE CORRECTED. NIST DOES NOT WARRANT OR MAKE ANY
+    ...% REPRESENTATIONS REGARDING THE USE OF THE SOFTWARE OR THE RESULTS
+    ...% THEREOF, INCLUDING BUT NOT LIMITED TO THE CORRECTNESS, ACCURACY,
+    ...% RELIABILITY, OR USEFULNESS OF THE SOFTWARE.
+    ...%
+    ...% You are solely responsible for determining the appropriateness of
+    ...% using and distributing the software and you assume all risks
+    ...% associated with its use, including but not limited to the risks and
+    ...% costs of program errors, compliance with applicable laws, damage to
+    ...% or loss of data, programs or equipment, and the unavailability or
+    ...% interruption of operation. This software is not intended to be used in
+    ...% any situation where a failure could cause risk of injury or damage to
+    ...% property. The software developed by NIST employees is not subject to
+    ...% copyright protection within the United States.
+    %% Title: A MATLAB Script to download all the files for "Dataset of channels and received IEEE 802.11ay signals for sensing applications in the 60GHz band"
 %% Author: Raied Caromi
 %% Contact: raied.caromi@nist.gov
 %% set save directory name
@@ -38,6 +38,8 @@ saveDir = pwd; % Download to current dir, change if different dir is desired
 %% Get json record of the dataset
 baseUrl='https://data.nist.gov/rmm/records/';
 recordID='mds2-2417';
+timeOut=20;
+options = weboptions('Timeout',timeOut);
 requestURL=[baseUrl,recordID];
 try
     resp = webread(requestURL);
@@ -48,20 +50,54 @@ catch err
 end
 findDownloadURL=cellfun(@(x) isfield(x,'downloadURL'),components);
 allWithDownloadURL=components(findDownloadURL);
-%% parse 
-%getAllLinks=cellfun(@(x)x.('downloadURL'), allWithDownloadURL,'un',0);
-getAllLinks=cellfun(@(x)strrep(x.('downloadURL'),'%20',' '), allWithDownloadURL,'un',0);
-getAllSizes=cellfun(@(x)x.('size'), allWithDownloadURL);
-getAllHashes=struct2table(cellfun(@(x)x.('checksum'), allWithDownloadURL)).hash;
-getfilesHashesIndex=cellfun(@(x) strcmp(x(end-6:end),'.sha256'),getAllLinks);
-getFilesOnly=getAllLinks(~getfilesHashesIndex);
-getFilesSizes=getAllSizes(~getfilesHashesIndex);
-getFilesHashesLinks=getAllLinks(getfilesHashesIndex);
-getFilesHashesText=getAllHashes(~getfilesHashesIndex);
-idPlace=cellfun(@(x) strfind(x,recordID),getFilesOnly);
-for J=1:numel(getFilesOnly)
-    AllDirs{J,1}=fileparts(getFilesOnly{J}(idPlace(J)+length(recordID):end));
+getBaseLinks=cellfun(@(x)strrep(x.('downloadURL'),'%20',' '), allWithDownloadURL,'un',0);
+hashFilesIndex=cellfun(@(x) strcmp(x(end-6:end),'.sha256'),getBaseLinks);
+getBaseLinks=getBaseLinks(~hashFilesIndex);
+getBaseHashesText=struct2table(cellfun(@(x)x.('checksum'), allWithDownloadURL)).hash;
+getBaseHashesText=getBaseHashesText(~hashFilesIndex);
+csvAndTextIndex=contains(getBaseLinks,{'.txt','.csv'});
+getBaseLinks=getBaseLinks(csvAndTextIndex);
+getBaseHashesText=getBaseHashesText(csvAndTextIndex);
+idPlace=cellfun(@(x) strfind(x,['/',recordID,'/']),getBaseLinks);
+
+for J=1:numel(getBaseLinks)
+    baseFileToSave{J,1}=fullfile(saveDir,getBaseLinks{J}(idPlace(J)+length(recordID)+2:end));
+    outFile=websave(baseFileToSave{J,1},getBaseLinks{J},options);
+    hash=GetFileHash(baseFileToSave{J,1});
+    if strcmpi(hash,getBaseHashesText{J})
+    else
+        fprintf('Error downloading base files, file:%s has wrong Hash! file will be deleted... \n',baseFileToSave{J,1})
+        delete(fileToSave);
+    end
 end
+%%
+downloadOption = input('Download option, \nEnter (A) for all data, (C) for channel data only, or (S) for received signals only:','s');
+if ~(strcmpi(downloadOption,'A')|| strcmpi(downloadOption,'C')|| strcmpi(downloadOption,'S'))
+    error('Error. Input must be A, C, or S')
+end
+
+indexFile=baseFileToSave{contains(baseFileToSave,recordID)&contains(baseFileToSave,'.csv')};
+% indexFile=[recordID,'-filelisting.csv'];
+
+varNames={'filePath', 'fileSize_bytes', 'fileType', 'MIMEType', 'SHA_256Hash', 'downloadURL'};
+fileTable=readtable(indexFile,'NumHeaderLines',5,'Delimiter',',');
+fileTable.Properties.VariableNames=varNames;
+%%
+switch downloadOption
+    case {'A', 'a'}
+        desiredIndex=true(numel(fileTable.filePath),1);
+    case {'C', 'c'}
+        desiredIndex=~cellfun(@(x) contains(x,'rxSignal/'),fileTable.filePath);
+    case {'S', 's'}
+        desiredIndex=~cellfun(@(x) contains(x,'qdChannel/'),fileTable.filePath);
+end
+
+getFilesOnly=fileTable.downloadURL(desiredIndex);
+getFilePathsOnly=fileTable.filePath(desiredIndex);
+getFilesHashesText=fileTable.SHA_256Hash(desiredIndex);
+getFilesSizes=fileTable.fileSize_bytes(desiredIndex);
+
+AllDirs=fileparts(getFilePathsOnly);
 fullNoneRepeatedDirs=fullfile(saveDir,unique(AllDirs));
 [~,ind]=sort(cellfun(@length,fullNoneRepeatedDirs));
 fullNoneRepeatedDirs=fullNoneRepeatedDirs(ind);
@@ -71,39 +107,46 @@ for I=1:numel(fullNoneRepeatedDirs)
         mkdir(fullNoneRepeatedDirs{I});
     end
 end
-allFilesToSave=fullfile(saveDir,cellfun(@(x) x(idPlace+length(recordID):end),getFilesOnly,'un',0));
+allFilesToSave=fullfile(saveDir,getFilePathsOnly);
 allFilesThatExist=cellfun(@isfile,allFilesToSave);
-countAlreadyExist=sum(allFilesThatExist);
 totalSizeOfTheSetGB=sum(getFilesSizes)/1024^3;
 fprintf('There are %d files in the dataset with a total size of %f GB \n', length(getFilesOnly),totalSizeOfTheSetGB)
 %%
 fprintf('Check if files already exist...\n')
-countAlreadyExistAndCorrect=0;
 
-if countAlreadyExist>0
-    fprintf('%d files already exist! Checking files integrity. This may take some time! \n',countAlreadyExist)
-    for K=1:numel(getFilesOnly)
-        fileName=getFilesOnly{K}(idPlace(K)+length(recordID):end);
+getFilesOnlyExists=getFilesOnly(allFilesThatExist);
+getFilePathsOnlyExists=getFilePathsOnly(allFilesThatExist);
+getFilesHashesTextExists=getFilesHashesText(allFilesThatExist);
+getFilesSizesExists=getFilesSizes(allFilesThatExist);
+
+countAlreadyExistAndCorrect=0;
+NumOfFilesExists=numel(getFilesOnlyExists);
+steps=100;
+verifyFilesSteps=1:round(NumOfFilesExists/steps):NumOfFilesExists;
+if NumOfFilesExists>0
+    fprintf('%d files already exist! Checking existing files integrity. This may take some time! \n',NumOfFilesExists)
+    for K=1:NumOfFilesExists
+        fileName=getFilePathsOnlyExists{K};
         fileToSave=fullfile(saveDir,fileName);
-        if isfile(fileToSave)
-            %Count_already_exist=Count_already_exist+1;
-            fprintf('File: %s ... Already exists! Verifying its integrity! ',fileName);
-            hash=GetFileHash(fileToSave);
-            if strcmpi(hash,getFilesHashesText{K})
-                fprintf('Hash ok! \n');
-                countAlreadyExistAndCorrect=countAlreadyExistAndCorrect+1;
-            else
-                fprintf('Wrong hash.. deleting file! \n');
-                delete(fileToSave)
-            end
-       end
+        %track file verification by percentage
+        if any( K==verifyFilesSteps)
+            fprintf('Progress:%d%% of existing files verified... \n',round(K/NumOfFilesExists*100))
+        end
+        hash=GetFileHash(fileToSave);
+        if strcmpi(hash,getFilesHashesTextExists{K})
+            
+            countAlreadyExistAndCorrect=countAlreadyExistAndCorrect+1;
+        else
+            fprintf('file:%s has wrong Hash!.. deleting file! \n',fileName);
+            delete(fileToSave)
+            
+        end
     end
-    fprintf('%d files were checked and %d files were correct. \n',countAlreadyExist, countAlreadyExistAndCorrect )
+    fprintf('%d files were checked and %d files were correct. \n',NumOfFilesExists, countAlreadyExistAndCorrect )
 else
     fprintf('No file exist in the provided direcory: %s \n', saveDir)
 end
 %recount file sizes in case some were deleted in the check
-allFilesToSave=fullfile(saveDir,cellfun(@(x) x(idPlace+length(recordID):end),getFilesOnly,'un',0));
 allFilesThatExist=cellfun(@isfile,allFilesToSave);
 if any(allFilesThatExist)
     files_exist_size_GB=sum(struct2table(cellfun(@dir,allFilesToSave(allFilesThatExist))).bytes)/1024^3;
@@ -111,49 +154,54 @@ else
     files_exist_size_GB=0;
 end
 %%
-timeOut=20;
-options = weboptions('Timeout',timeOut);
+% update files to be downloaded
+getFilesOnlyUpdated=getFilesOnly(~allFilesThatExist);
+getFilePathsOnlyUpdated=getFilePathsOnly(~allFilesThatExist);
+getFilesHashesTextUpdated=getFilesHashesText(~allFilesThatExist);
+getFilesSizesUpdated=getFilesSizes(~allFilesThatExist);
+
 countDownloaded=0;
 countFailed=0;
 fprintf('Attempting to download %d files with a total size of %f GB! \n',length(getFilesOnly)-countAlreadyExistAndCorrect, totalSizeOfTheSetGB-files_exist_size_GB)
-in = input('Do you want to continue (y/n)? ','s');
-if strcmpi(in,'y')
-    startTime=tic;
-    for K=1:numel(getFilesOnly)
-        fileName=getFilesOnly{K}(idPlace(K)+length(recordID):end);
-        fileToSave=fullfile(saveDir,fileName);
-        if ~isfile(fileToSave)
-            fprintf('Downloading file:%s ... \n',fileName);
-            outFile=websave(fileToSave,getFilesOnly{K},options);
-            fprintf('File: %s was downloaded. Verifying its hash!',outFile);
-            hash=GetFileHash(fileToSave);
-            if strcmpi(hash,getFilesHashesText{K})
-                fprintf('Hash ok! \n')
-                countDownloaded=countDownloaded+1;
-            else
-                fprintf('Wrong Hash! file will be deleted... \n')
-                delete(fileToSave);
-                countFailed=countFailed+1;
-            end
-        end
+fprintf('\n This might take long time depending on the network and local storage speed. \n ')
+
+NumOfFilesUpdated=numel(getFilesOnlyUpdated);
+startTime=tic;
+downloadedFilesSteps=1:round(NumOfFilesUpdated/steps):NumOfFilesUpdated;
+
+for K=1:NumOfFilesUpdated
+    
+    fileName=getFilePathsOnlyUpdated{K};
+    fileToSave=fullfile(saveDir,fileName);
+    %track download by percentage
+    if any( K==downloadedFilesSteps)
+        fprintf('Progress:%d%% of files downloaded... \n',round(K/NumOfFilesUpdated*100))
     end
-    elapsedTime=toc(startTime);
-    fprintf('Download time for %d files= %s hh:mm:ss ---\n',countDownloaded,datestr(elapsedTime/(24*60*60),'HH:MM:SS'))
-    fprintf('%d files failed to download! \n',countFailed)
-    fprintf('Total number of the files in the dataset (newly downloaded and already exist)=%d \n', countDownloaded+countAlreadyExistAndCorrect)
-else
-    fprintf('Download script was terminated! \n');
+    outFile=websave(fileToSave,getFilesOnlyUpdated{K},options);
+    hash=GetFileHash(fileToSave);
+    if strcmpi(hash,getFilesHashesTextUpdated{K})
+        countDownloaded=countDownloaded+1;
+    else
+        fprintf('Error, file:%s has wrong Hash! file will be deleted... \n',fileName)
+        delete(fileToSave);
+        countFailed=countFailed+1;
+    end
 end
+elapsedTime=toc(startTime);
+fprintf('Download time for %d files= %s hh:mm:ss ---\n',countDownloaded,datestr(elapsedTime/(24*60*60),'HH:MM:SS'))
+fprintf('%d files failed to download! \n',countFailed)
+fprintf('Total number of the files in the dataset (newly downloaded and already exist)=%d \n', countDownloaded+countAlreadyExistAndCorrect)
+
 %%
 function hash=GetFileHash(fileNamePath)
-mddigest   = java.security.MessageDigest.getInstance('SHA-256'); 
+mddigest   = java.security.MessageDigest.getInstance('SHA-256');
 
 bufsize = 4*1024*1024;
 
 fid = fopen(fileNamePath);
 
 while ~feof(fid)
-    [currData,len] = fread(fid, bufsize, '*uint8');       
+    [currData,len] = fread(fid, bufsize, '*uint8');
     if ~isempty(currData)
         mddigest.update(currData, 0, len);
     end
