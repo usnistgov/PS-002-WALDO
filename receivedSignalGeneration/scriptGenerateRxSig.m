@@ -7,7 +7,7 @@ addpath(genpath(challengeFolder));
 %% Params
 showPlot = 0;
 snr = [-18 0 18];
-chIdVec = 0:0;
+chIdVec = 0:15577;
 
 %% Constant
 Nsts = 4;
