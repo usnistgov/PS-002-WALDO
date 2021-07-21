@@ -5,6 +5,8 @@
 * [Installation](#installation)
 * [Requirements](#requirements)
 * [Download Dataset](#download-dataset)
+* [Contributing](#contributing)
+* [Authors](#authors)
 * [License](#license)
 
 ## Installation
@@ -36,6 +38,17 @@ on the network and local storage speed.
 A progress percentage reports the download status.
   * When the download is completed, execute the script `receivedSignalGeneration/scriptGenerateRxSig.m`. The script is 
 generating a transmit signal, pass it trough the downloaded channels and add AWGN noise. The received signals are stored in `dataset\rxSignal`.
+
+
+## Contributing
+Feedbacks and additions are more than welcomed! You can directly contact the [authors](#Authors) for any information.
+
+
+## Authors
+
+[![NIST picture](https://github.com/usnistgov.png?size=100)](https://github.com/usnistgov)
+
+The WALDO challenge has been designed at NIST by Steve Blandino (steve.blandino@nist.gov), Raied Caromi (raied.caromi@nist.gov) and Tanguy Ropitault (tanguy.ropitault@nist.gov).
 
 
 ## License
