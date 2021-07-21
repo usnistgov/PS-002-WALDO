@@ -38,7 +38,7 @@ saveDir = pwd; % Download to current dir, change if different dir is desired
 %% Get json record of the dataset
 baseUrl='https://data.nist.gov/rmm/records/';
 recordID='mds2-2417';
-timeOut=20;
+timeOut=40;
 options = weboptions('Timeout',timeOut);
 requestURL=[baseUrl,recordID];
 try

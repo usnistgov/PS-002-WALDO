@@ -49,7 +49,7 @@ def webSavePy(url, output_path):
     # MAX_RETRIES = 2
     # WAIT_SECONDS = 5
     # for i in range(MAX_RETRIES):
-        timeOut=20
+        timeOut=40
         try:
             req = requests.get(url, stream = True,timeout=timeOut)
             fileSizeIsKnown=False
