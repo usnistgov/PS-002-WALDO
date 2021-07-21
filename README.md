@@ -1,5 +1,5 @@
 # PS-002 WALDO (Wireless Artificial intelligence Location DetectiOn)), we finally know where you are: sensing using mmWave communications and ML.
-> Software and dataset resource for ITU AI/ML 5G Challenge. To register to the channel, please visit https://challenge.aiforgood.itu.int/match/matchitem/38.
+> Software and dataset resource for ITU AI/ML 5G Challenge. To register to the challenge, please visit https://challenge.aiforgood.itu.int/match/matchitem/38.
 
 ## Table of Contents
 * [Installation](#installation)
