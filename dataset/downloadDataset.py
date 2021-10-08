@@ -165,10 +165,10 @@ for J in range(len(getBaseLinks)):
 varNames=['filePath', 'fileSize_bytes', 'fileType', 'MIMEType', 'SHA_256Hash', 'downloadURL']
 fileTable=pd.read_csv(indexFile,skiprows=5, header=None,delimiter=',',names=varNames)
 #%%
-downloadOption = input('Download option, \nEnter (A) for all data, (C) for channel data only, or (S) for received signals only:')
+downloadOption = input('Download option, \nEnter (A) for all data, (C) for channel data only, (S) for received signals only, or (V) for validation data only:')
 downloadOption=downloadOption.upper()
-if not(downloadOption=='A' or downloadOption=='C' or downloadOption=='S'):
-    raise ValueError('Error. Input must be A, C, or S')   
+if not(downloadOption=='A' or downloadOption=='C' or downloadOption=='S' or downloadOption=='V'):
+    raise ValueError('Error. Input must be A, C, S, or V')   
 
 if downloadOption=='A':
         desiredIndex=list(range(len(fileTable['filePath'])))
@@ -181,6 +181,11 @@ elif downloadOption=='S':
         desiredIndex=[]
         for I in range(len(fileTable['filePath'])):
             if not('qdChannel/' in fileTable['filePath'][I]):
+                desiredIndex.append(I)
+elif downloadOption=='V':
+        desiredIndex=[]
+        for I in range(len(fileTable['filePath'])):
+            if ('validation/' in fileTable['filePath'][I]):
                 desiredIndex.append(I)
 
 getFilesOnly=(fileTable['downloadURL'][desiredIndex]).to_numpy()

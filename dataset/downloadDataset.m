@@ -71,9 +71,9 @@ for J=1:numel(getBaseLinks)
     end
 end
 %%
-downloadOption = input('Download option, \nEnter (A) for all data, (C) for channel data only, or (S) for received signals only:','s');
-if ~(strcmpi(downloadOption,'A')|| strcmpi(downloadOption,'C')|| strcmpi(downloadOption,'S'))
-    error('Error. Input must be A, C, or S')
+downloadOption = input('Download option, \nEnter (A) for all data, (C) for channel data only, (S) for received signals only, or (V) for validation data only:','s');
+if ~(strcmpi(downloadOption,'A')|| strcmpi(downloadOption,'C')|| strcmpi(downloadOption,'S')|| strcmpi(downloadOption,'V'))
+    error('Error. Input must be A, C, S, or V')
 end
 
 indexFile=baseFileToSave{contains(baseFileToSave,recordID)&contains(baseFileToSave,'.csv')};
@@ -90,6 +90,8 @@ switch downloadOption
         desiredIndex=~cellfun(@(x) contains(x,'rxSignal/'),fileTable.filePath);
     case {'S', 's'}
         desiredIndex=~cellfun(@(x) contains(x,'qdChannel/'),fileTable.filePath);
+    case {'V', 'v'}
+        desiredIndex=cellfun(@(x) contains(x,'validation/'),fileTable.filePath);
 end
 
 getFilesOnly=fileTable.downloadURL(desiredIndex);
